@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Animalton — {{ entry.label|capitalize }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>🐾 Animalton</h1>
+    <a class="link" href="/gallery">Back to Collection</a>
+  </header>
+
+  <main class="species-screen">
+    <div class="species-header">
+      <h2>{{ entry.label|capitalize }}</h2>
+      <p class="species-stats">
+        Caught {{ entry.times_caught }}x · Best match {{ (entry.best_confidence * 100) | round(1) }}%
+      </p>
+    </div>
+
+    <div class="photo-grid">
+      {% for photo in photos %}
+        <div class="photo-tile">
+          <img src="{{ url_for('static', filename='captures/' + photo.file) }}"
+               alt="{{ entry.label }} catch" />
+          <div class="photo-tile-meta">
+            <span class="photo-conf">{{ (photo.confidence * 100) | round(1) }}%</span>
+            <span class="photo-date">{{ photo.caught_at | datetime }}</span>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </main>
+</body>
+</html>

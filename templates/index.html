@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Animalton — Catch!</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>🐾 Animalton</h1>
+    <a class="link" href="/gallery">My Collection</a>
+  </header>
+
+  <main class="camera-screen">
+    <!-- No <input type="file"> anywhere — the only way a photo gets in
+         is by grabbing a frame from this live camera stream. -->
+    <div class="video-wrap" id="videoWrap">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="canvas" class="hidden"></canvas>
+
+      <img id="frozenFrame" class="frozen-frame hidden" alt="Captured frame" />
+
+      <div class="scan-frame">
+        <div class="corner-tl"></div>
+        <div class="corner-tr"></div>
+        <div class="corner-bl"></div>
+        <div class="corner-br"></div>
+      </div>
+
+      <div id="flash" class="flash"></div>
+
+      <div id="analyzingOverlay" class="analyzing-overlay hidden">
+        <div class="scan-grid"></div>
+        <div class="radar-sweep"></div>
+        <p class="analyzing-text">Identifying species<span class="dots"><span>.</span><span>.</span><span>.</span></span></p>
+      </div>
+    </div>
+
+    <p id="status" class="status">Point your camera at an animal and tap the shutter</p>
+
+    <div class="controls">
+      <button id="captureBtn" class="shutter-btn" aria-label="Catch">
+        <span class="shutter-inner"></span>
+      </button>
+    </div>
+
+    <div id="resultCard" class="result-card hidden">
+      <img id="resultPhoto" alt="Captured animal" />
+      <div id="resultText"></div>
+      <button id="closeResult" class="secondary-btn">Keep exploring</button>
+    </div>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/camera.js') }}"></script>
+</body>
+</html>

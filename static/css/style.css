@@ -1,0 +1,293 @@
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #0f172a;
+  color: #f1f5f9;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: #1e293b;
+}
+.topbar h1 { font-size: 1.2rem; margin: 0; }
+.topbar .link { color: #38bdf8; text-decoration: none; font-weight: 600; }
+
+.camera-screen, .gallery-screen {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.video-wrap {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background: black;
+  aspect-ratio: 3 / 4;
+}
+#video, .frozen-frame {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.hidden { display: none !important; }
+
+.scan-frame {
+  position: absolute;
+  inset: 12%;
+  pointer-events: none;
+}
+.corner-tl, .corner-tr, .corner-bl, .corner-br {
+  content: "";
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border: 3px solid #38bdf8;
+  opacity: 0.85;
+  animation: pulseCorner 2s ease-in-out infinite;
+}
+.corner-tl { top: 0; left: 0; border-right: none; border-bottom: none; border-radius: 6px 0 0 0; }
+.corner-tr { top: 0; right: 0; border-left: none; border-bottom: none; border-radius: 0 6px 0 0; }
+.corner-bl { bottom: 0; left: 0; border-right: none; border-top: none; border-radius: 0 0 0 6px; }
+.corner-br { bottom: 0; right: 0; border-left: none; border-top: none; border-radius: 0 0 6px 0; }
+@keyframes pulseCorner {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.flash {
+  position: absolute;
+  inset: 0;
+  background: white;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease-out;
+}
+.flash-active { opacity: 0.85; }
+
+.analyzing-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  overflow: hidden;
+}
+.radar-sweep {
+  position: absolute;
+  inset: 0;
+  background: conic-gradient(
+    from 0deg,
+    rgba(74, 222, 128, 0) 0deg,
+    rgba(74, 222, 128, 0) 300deg,
+    rgba(74, 222, 128, 0.55) 355deg,
+    rgba(74, 222, 128, 0) 360deg
+  );
+  animation: spin 1.1s linear infinite;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.scan-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(56, 189, 248, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56, 189, 248, 0.15) 1px, transparent 1px);
+  background-size: 24px 24px;
+  animation: gridFade 1.4s ease-in-out infinite;
+}
+@keyframes gridFade {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+.analyzing-text {
+  position: relative;
+  margin-bottom: 24px;
+  background: rgba(15, 23, 42, 0.75);
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.dots span {
+  animation: blink 1.4s infinite;
+  opacity: 0;
+}
+.dots span:nth-child(2) { animation-delay: 0.2s; }
+.dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink {
+  0%, 20% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.status {
+  text-align: center;
+  min-height: 1.4em;
+  color: #cbd5e1;
+}
+
+.controls { display: flex; justify-content: center; margin-top: 14px; }
+
+.shutter-btn {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  border: 4px solid #f1f5f9;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 100ms ease-out;
+}
+.shutter-btn:active { transform: scale(0.9); }
+.shutter-btn:disabled { opacity: 0.5; cursor: default; }
+.shutter-inner {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #38bdf8;
+  transition: border-radius 120ms ease-out, background 120ms ease-out;
+}
+.shutter-btn:active .shutter-inner {
+  border-radius: 14px;
+  background: #0ea5e9;
+}
+
+.result-card {
+  margin-top: 18px;
+  background: #1e293b;
+  border-radius: 16px;
+  padding: 16px;
+  text-align: center;
+}
+.result-card img {
+  width: 100%;
+  max-height: 260px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+.species-name { font-size: 1.3rem; font-weight: 700; color: #4ade80; }
+.conf { color: #94a3b8; font-size: 0.9rem; }
+
+.secondary-btn {
+  margin-top: 8px;
+  background: transparent;
+  border: 1px solid #475569;
+  color: #f1f5f9;
+  padding: 8px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.gallery-count { color: #94a3b8; }
+.empty-msg { color: #94a3b8; text-align: center; margin-top: 40px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.card {
+  background: #1e293b;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.card img { width: 100%; height: 120px; object-fit: cover; }
+.card-body { padding: 8px 10px; }
+.card-body h3 { margin: 0 0 4px 0; font-size: 1rem; }
+.card-body p { margin: 2px 0; font-size: 0.8rem; color: #94a3b8; }
+.confidence { color: #4ade80 !important; }
+
+/* --- Gallery card as a clickable link (photo count badge + no underline) --- */
+.card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+.card-photo-wrap {
+  position: relative;
+}
+.photo-count-badge {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  background: rgba(15, 23, 42, 0.85);
+  color: #4ade80;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+/* --- Species detail page --- */
+.species-screen {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px;
+}
+.species-header {
+  text-align: center;
+  margin-bottom: 18px;
+}
+.species-header h2 {
+  margin: 0 0 4px 0;
+  font-size: 1.6rem;
+}
+.species-stats {
+  color: #94a3b8;
+  margin: 0;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.photo-tile {
+  background: #1e293b;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.photo-tile img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+}
+.photo-tile-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  font-size: 0.72rem;
+}
+.photo-conf {
+  color: #4ade80;
+  font-weight: 700;
+}
+.photo-date {
+  color: #94a3b8;
+}
+
+@media (min-width: 500px) {
+  .photo-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
