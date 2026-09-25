@@ -7,24 +7,37 @@ body {
   color: #f1f5f9;
 }
 
+.hidden { display: none !important; }
+
 .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 18px;
+  padding: 14px 24px;
   background: #1e293b;
 }
 .topbar h1 { font-size: 1.2rem; margin: 0; }
 .topbar .link { color: #38bdf8; text-decoration: none; font-weight: 600; }
 
-.camera-screen, .gallery-screen {
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 16px;
+/* ---------- Camera page: always centered, regardless of the tip panel ---------- */
+.camera-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  min-height: calc(100vh - 60px);
+  padding: 24px 16px;
+}
+
+.camera-screen {
+  width: 100%;
+  max-width: 420px;
 }
 
 .video-wrap {
   position: relative;
+  width: 100%;
   border-radius: 16px;
   overflow: hidden;
   background: black;
@@ -38,7 +51,6 @@ body {
   top: 0;
   left: 0;
 }
-.hidden { display: none !important; }
 
 .scan-frame {
   position: absolute;
@@ -58,10 +70,7 @@ body {
 .corner-tr { top: 0; right: 0; border-left: none; border-bottom: none; border-radius: 0 6px 0 0; }
 .corner-bl { bottom: 0; left: 0; border-right: none; border-top: none; border-radius: 0 0 0 6px; }
 .corner-br { bottom: 0; right: 0; border-left: none; border-top: none; border-radius: 0 0 6px 0; }
-@keyframes pulseCorner {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
-}
+@keyframes pulseCorner { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 
 .flash {
   position: absolute;
@@ -70,6 +79,7 @@ body {
   opacity: 0;
   pointer-events: none;
   transition: opacity 120ms ease-out;
+  z-index: 5;
 }
 .flash-active { opacity: 0.85; }
 
@@ -82,36 +92,23 @@ body {
   align-items: center;
   justify-content: flex-end;
   overflow: hidden;
+  z-index: 4;
 }
 .radar-sweep {
   position: absolute;
   inset: 0;
-  background: conic-gradient(
-    from 0deg,
-    rgba(74, 222, 128, 0) 0deg,
-    rgba(74, 222, 128, 0) 300deg,
-    rgba(74, 222, 128, 0.55) 355deg,
-    rgba(74, 222, 128, 0) 360deg
-  );
+  background: conic-gradient(from 0deg, rgba(74,222,128,0) 0deg, rgba(74,222,128,0) 300deg, rgba(74,222,128,0.55) 355deg, rgba(74,222,128,0) 360deg);
   animation: spin 1.1s linear infinite;
 }
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .scan-grid {
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(rgba(56, 189, 248, 0.15) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(56, 189, 248, 0.15) 1px, transparent 1px);
+  background-image: linear-gradient(rgba(56,189,248,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,0.15) 1px, transparent 1px);
   background-size: 24px 24px;
   animation: gridFade 1.4s ease-in-out infinite;
 }
-@keyframes gridFade {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.7; }
-}
+@keyframes gridFade { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.7; } }
 .analyzing-text {
   position: relative;
   margin-bottom: 24px;
@@ -121,22 +118,16 @@ body {
   font-weight: 600;
   letter-spacing: 0.02em;
 }
-.dots span {
-  animation: blink 1.4s infinite;
-  opacity: 0;
-}
+.dots span { animation: blink 1.4s infinite; opacity: 0; }
 .dots span:nth-child(2) { animation-delay: 0.2s; }
 .dots span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes blink {
-  0%, 20% { opacity: 0; }
-  50% { opacity: 1; }
-  100% { opacity: 0; }
-}
+@keyframes blink { 0%, 20% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
 
 .status {
   text-align: center;
   min-height: 1.4em;
   color: #cbd5e1;
+  margin-top: 12px;
 }
 
 .controls { display: flex; justify-content: center; margin-top: 14px; }
@@ -163,67 +154,150 @@ body {
   background: #38bdf8;
   transition: border-radius 120ms ease-out, background 120ms ease-out;
 }
-.shutter-btn:active .shutter-inner {
-  border-radius: 14px;
-  background: #0ea5e9;
-}
+.shutter-btn:active .shutter-inner { border-radius: 14px; background: #0ea5e9; }
 
-.result-card {
-  margin-top: 18px;
-  background: #1e293b;
+/* ---------- Drag & drop upload zone ---------- */
+.dropzone {
+  position: relative;
+  margin-top: 14px;
+  border: 2px dashed #475569;
   border-radius: 16px;
-  padding: 16px;
+  padding: 20px;
   text-align: center;
+  cursor: pointer;
+  transition: border-color 150ms ease-out, background 150ms ease-out;
+  min-height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.result-card img {
-  width: 100%;
-  max-height: 260px;
-  object-fit: cover;
-  border-radius: 12px;
-  margin-bottom: 10px;
-}
-.species-name { font-size: 1.3rem; font-weight: 700; color: #4ade80; }
-.conf { color: #94a3b8; font-size: 0.9rem; }
+.dropzone:hover, .dropzone-active { border-color: #38bdf8; background: rgba(56, 189, 248, 0.06); }
+.dropzone-content p { margin: 6px 0 0 0; color: #cbd5e1; font-size: 0.85rem; }
+.dropzone-icon { font-size: 1.6rem; }
+.dropzone-browse { color: #38bdf8; text-decoration: underline; }
+.upload-preview { max-width: 100%; max-height: 140px; border-radius: 10px; object-fit: cover; }
 
-.secondary-btn {
-  margin-top: 8px;
-  background: transparent;
-  border: 1px solid #475569;
-  color: #f1f5f9;
-  padding: 8px 18px;
+/* ---------- Catch screen: fully replaces camera UI, centered, animated ---------- */
+.catch-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  width: 100%;
+}
+.catch-screen-inner {
+  text-align: center;
+  max-width: 340px;
+  width: 100%;
+  opacity: 0;
+}
+.catch-screen-animate .catch-screen-inner {
+  animation: catchPopIn 480ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+@keyframes catchPopIn {
+  0%   { opacity: 0; transform: scale(0.6) translateY(20px); }
+  70%  { opacity: 1; transform: scale(1.05) translateY(0); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.catch-badge {
+  display: inline-block;
+  background: rgba(74, 222, 128, 0.15);
+  color: #4ade80;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 6px 16px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+.catch-photo {
+  width: 100%;
+  max-width: 260px;
+  height: 260px;
+  object-fit: cover;
+  border-radius: 24px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  margin-bottom: 16px;
+}
+.catch-name { font-size: 1.6rem; margin: 0 0 6px 0; }
+.catch-meta { color: #94a3b8; margin: 0 0 22px 0; }
+.catch-actions { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.shutter-cta {
+  background: #38bdf8;
+  color: #0f172a;
+  border: none;
+  font-weight: 700;
+  padding: 12px 28px;
   border-radius: 999px;
   cursor: pointer;
+  font-size: 1rem;
 }
+.catch-view-link { color: #38bdf8; text-decoration: none; font-size: 0.9rem; }
+.catch-view-link:hover { text-decoration: underline; }
 
+/* ---------- "How it works" panel ---------- */
+.desktop-tip {
+  display: none;
+  position: relative;
+}
+.tip-close {
+  position: absolute; top: 12px; right: 12px;
+  background: transparent; border: none; color: #94a3b8;
+  font-size: 1.1rem; cursor: pointer; padding: 4px 8px; border-radius: 6px;
+}
+.tip-close:hover { color: #f1f5f9; background: rgba(255,255,255,0.06); }
+
+/* FIX: pinned to a fixed corner of the VIEWPORT instead of sitting inside
+   the centering flex row. It previously used `margin: 0 auto`, which in
+   a flex row absorbs all free space and pushes siblings apart — that's
+   what was shoving the camera to the left of the page. */
+.tip-reopen {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 20;
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #94a3b8;
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.tip-reopen:hover { color: #f1f5f9; border-color: #38bdf8; }
+
+/* ---------- Gallery / category / species pages ---------- */
+.gallery-screen, .species-screen {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
 .gallery-count { color: #94a3b8; }
 .empty-msg { color: #94a3b8; text-align: center; margin-top: 40px; }
 
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 14px;
 }
 
-.card {
-  background: #1e293b;
-  border-radius: 14px;
-  overflow: hidden;
-}
-.card img { width: 100%; height: 120px; object-fit: cover; }
-.card-body { padding: 8px 10px; }
-.card-body h3 { margin: 0 0 4px 0; font-size: 1rem; }
-.card-body p { margin: 2px 0; font-size: 0.8rem; color: #94a3b8; }
-.confidence { color: #4ade80 !important; }
-
-/* --- Gallery card as a clickable link (photo count badge + no underline) --- */
 .card {
   display: block;
   text-decoration: none;
   color: inherit;
+  background: #1e293b;
+  border-radius: 14px;
+  overflow: hidden;
+  transition: transform 120ms ease-out;
 }
-.card-photo-wrap {
-  position: relative;
-}
+.card:hover { transform: translateY(-3px); }
+.card-photo-wrap { position: relative; }
+.card img { width: 100%; height: 130px; object-fit: cover; display: block; }
+.card-body { padding: 10px 12px; }
+.card-body h3 { margin: 0 0 4px 0; font-size: 1rem; }
+.card-body p { margin: 2px 0; font-size: 0.8rem; color: #94a3b8; }
+.confidence { color: #4ade80 !important; }
+
 .photo-count-badge {
   position: absolute;
   bottom: 6px;
@@ -235,59 +309,67 @@ body {
   padding: 3px 8px;
   border-radius: 999px;
 }
+.category-emoji {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-size: 1.4rem;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.6));
+}
+.category-card img { height: 150px; }
 
-/* --- Species detail page --- */
-.species-screen {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 16px;
+.species-header { text-align: center; margin-bottom: 20px; }
+.species-header h2 { margin: 0 0 8px 0; font-size: 1.8rem; }
+.species-stats, .category-desc { color: #94a3b8; margin: 0 0 10px 0; }
+.category-desc { max-width: 560px; margin-left: auto; margin-right: auto; }
+
+.rating-row { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.rating-pill {
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: #1e293b;
+  border: 1px solid #334155;
 }
-.species-header {
-  text-align: center;
-  margin-bottom: 18px;
-}
-.species-header h2 {
-  margin: 0 0 4px 0;
-  font-size: 1.6rem;
-}
-.species-stats {
-  color: #94a3b8;
-  margin: 0;
-}
+.danger-very-low { color: #4ade80; border-color: #4ade80; }
+.danger-low { color: #4ade80; border-color: #4ade80; }
+.danger-medium { color: #facc15; border-color: #facc15; }
+.danger-high { color: #f87171; border-color: #f87171; }
+.danger-very-high { color: #ef4444; border-color: #ef4444; }
+.danger-unknown { color: #94a3b8; }
+.rating-pill.friendly { color: #38bdf8; border-color: #38bdf8; }
 
 .photo-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
 }
-.photo-tile {
-  background: #1e293b;
-  border-radius: 14px;
-  overflow: hidden;
-}
-.photo-tile img {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
-  display: block;
-}
-.photo-tile-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 10px;
-  font-size: 0.72rem;
-}
-.photo-conf {
-  color: #4ade80;
-  font-weight: 700;
-}
-.photo-date {
-  color: #94a3b8;
+.photo-tile { background: #1e293b; border-radius: 14px; overflow: hidden; }
+.photo-tile img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; }
+.photo-tile-meta { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; font-size: 0.72rem; }
+.photo-conf { color: #4ade80; font-weight: 700; }
+.photo-date { color: #94a3b8; }
+
+/* ---------- Responsive ---------- */
+@media (min-width: 600px) {
+  .grid { grid-template-columns: repeat(3, 1fr); }
+  .photo-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
-@media (min-width: 500px) {
-  .photo-grid {
-    grid-template-columns: repeat(3, 1fr);
+@media (min-width: 900px) {
+  .camera-page { flex-direction: row; align-items: center; }
+  .desktop-tip {
+    display: block;
+    flex: 0 0 380px;
+    background: #1e293b;
+    border-radius: 16px;
+    padding: 28px;
   }
+  .desktop-tip h2 { margin-top: 0; }
+  .desktop-tip p { color: #cbd5e1; line-height: 1.6; }
+  .desktop-tip a { color: #38bdf8; }
+
+  .grid { grid-template-columns: repeat(4, 1fr); }
+  .photo-grid { grid-template-columns: repeat(4, 1fr); }
 }

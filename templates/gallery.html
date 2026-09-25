@@ -13,26 +13,22 @@
   </header>
 
   <main class="gallery-screen">
-    <p class="gallery-count">{{ entries|length }} species discovered</p>
+    <p class="gallery-count">{{ categories|length }} categories discovered</p>
 
-    {% if entries|length == 0 %}
+    {% if categories|length == 0 %}
       <p class="empty-msg">Nothing caught yet — go find an animal!</p>
     {% endif %}
 
-    <div class="grid">
-      {% for entry in entries %}
-        <a class="card" href="{{ url_for('species_detail', label=entry.label) }}">
+    <div class="grid category-grid">
+      {% for cat in categories %}
+        <a class="card category-card" href="{{ url_for('category_detail', key=cat.key) }}">
           <div class="card-photo-wrap">
-            <img src="{{ url_for('static', filename='captures/' + entry.photos[-1].file) }}"
-                 alt="{{ entry.label }}" />
-            {% if entry.photos|length > 1 %}
-              <span class="photo-count-badge">{{ entry.photos|length }} photos</span>
-            {% endif %}
+            <img src="{{ url_for('static', filename='captures/' + cat.cover_photo) }}" alt="{{ cat.name }}" />
+            <span class="category-emoji">{{ cat.emoji }}</span>
           </div>
           <div class="card-body">
-            <h3>{{ entry.label|capitalize }}</h3>
-            <p>Caught {{ entry.times_caught }}x</p>
-            <p class="confidence">Best match: {{ (entry.best_confidence * 100) | round(1) }}%</p>
+            <h3>{{ cat.name }}</h3>
+            <p>{{ cat.species_count }} species · {{ cat.total_catches }} catches</p>
           </div>
         </a>
       {% endfor %}

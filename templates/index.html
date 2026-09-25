@@ -12,44 +12,72 @@
     <a class="link" href="/gallery">My Collection</a>
   </header>
 
-  <main class="camera-screen">
-    <!-- No <input type="file"> anywhere — the only way a photo gets in
-         is by grabbing a frame from this live camera stream. -->
-    <div class="video-wrap" id="videoWrap">
-      <video id="video" autoplay playsinline muted></video>
-      <canvas id="canvas" class="hidden"></canvas>
+  <main class="camera-page">
+    <div class="camera-screen">
 
-      <img id="frozenFrame" class="frozen-frame hidden" alt="Captured frame" />
+      <div id="captureUI">
+        <div class="video-wrap" id="videoWrap">
+          <video id="video" autoplay playsinline muted></video>
+          <canvas id="canvas" class="hidden"></canvas>
+          <img id="frozenFrame" class="frozen-frame hidden" alt="Captured frame" />
 
-      <div class="scan-frame">
-        <div class="corner-tl"></div>
-        <div class="corner-tr"></div>
-        <div class="corner-bl"></div>
-        <div class="corner-br"></div>
+          <div class="scan-frame">
+            <div class="corner-tl"></div>
+            <div class="corner-tr"></div>
+            <div class="corner-bl"></div>
+            <div class="corner-br"></div>
+          </div>
+
+          <div id="flash" class="flash"></div>
+
+          <div id="analyzingOverlay" class="analyzing-overlay hidden">
+            <div class="scan-grid"></div>
+            <div class="radar-sweep"></div>
+            <p class="analyzing-text">Identifying species<span class="dots"><span>.</span><span>.</span><span>.</span></span></p>
+          </div>
+        </div>
+
+        <p id="status" class="status">Point your camera at an animal and tap the shutter</p>
+
+        <div class="controls">
+          <button id="captureBtn" class="shutter-btn" aria-label="Catch">
+            <span class="shutter-inner"></span>
+          </button>
+        </div>
+
+        <div id="dropzone" class="dropzone">
+          <img id="uploadPreview" class="upload-preview hidden" alt="Selected photo" />
+          <div id="dropzoneContent" class="dropzone-content">
+            <span class="dropzone-icon">📁</span>
+            <p><strong>Drag & drop</strong> a photo here, or <span class="dropzone-browse">browse</span></p>
+          </div>
+          <input type="file" id="uploadInput" accept="image/*" class="hidden" />
+        </div>
       </div>
 
-      <div id="flash" class="flash"></div>
-
-      <div id="analyzingOverlay" class="analyzing-overlay hidden">
-        <div class="scan-grid"></div>
-        <div class="radar-sweep"></div>
-        <p class="analyzing-text">Identifying species<span class="dots"><span>.</span><span>.</span><span>.</span></span></p>
+      <div id="catchScreen" class="catch-screen hidden">
+        <div class="catch-screen-inner">
+          <p id="catchBadge" class="catch-badge">New species discovered!</p>
+          <img id="catchPhoto" class="catch-photo" alt="Caught animal" />
+          <h2 id="catchName" class="catch-name"></h2>
+          <p id="catchMeta" class="catch-meta"></p>
+          <div class="catch-actions">
+            <button id="catchContinueBtn" class="shutter-cta">Keep Exploring</button>
+            <a id="catchViewLink" href="#" class="catch-view-link">View in Collection →</a>
+          </div>
+        </div>
       </div>
+
     </div>
 
-    <p id="status" class="status">Point your camera at an animal and tap the shutter</p>
+    <aside class="desktop-tip" id="desktopTip">
+      <button id="tipCloseBtn" class="tip-close" aria-label="Hide this panel">✕</button>
+      <h2>How it works</h2>
+      <p>Point your camera at a real animal and tap the shutter — OpenCV runs the photo through an AI classifier to identify the species and add it to your collection.</p>
+      <p>Your collection is organized by category. Open <a href="/gallery">My Collection</a> to browse everything you've caught.</p>
+    </aside>
 
-    <div class="controls">
-      <button id="captureBtn" class="shutter-btn" aria-label="Catch">
-        <span class="shutter-inner"></span>
-      </button>
-    </div>
-
-    <div id="resultCard" class="result-card hidden">
-      <img id="resultPhoto" alt="Captured animal" />
-      <div id="resultText"></div>
-      <button id="closeResult" class="secondary-btn">Keep exploring</button>
-    </div>
+    <button id="tipReopenBtn" class="tip-reopen hidden">ℹ️ How it works</button>
   </main>
 
   <script src="{{ url_for('static', filename='js/camera.js') }}"></script>

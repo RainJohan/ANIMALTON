@@ -1,20 +1,9 @@
 """
 ANIMALTON — backend server
 ---------------------------
-A Flask app that:
-  1. Serves a "Camera" page (live capture only — no file picker/upload).
-  2. Receives a captured frame from the browser (base64 PNG/JPEG).
-  3. Runs it through OpenCV's DNN-based dog breed classifier (see classifier.py).
-  4. If a dog breed is recognized, saves the photo + adds it to that
-     breed's Pokedex-style collection (data/collection.json) — every
-     capture is kept, not just the most recent.
-  5. Serves a "Gallery" page (all species caught) and a "Species" page
-     per breed showing every photo you've ever caught of it.
-
-Local run:
-    python app.py
-Production (used automatically by the Procfile on Render/etc.):
-    gunicorn app:app
+Flask app: live-camera capture (+ upload), OpenCV/DNN animal detection,
+a category-organized Pokedex-style gallery (Lions, Sharks, Snakes...),
+and per-species pages with individual descriptions and photo history.
 """
 
 import base64
@@ -29,6 +18,8 @@ from flask import Flask, jsonify, render_template, request, abort
 from PIL import Image
 
 from classifier import classify_animal
+from categories import categorize, CATEGORIES
+from species_info import get_species_info
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CAPTURES_DIR = os.path.join(BASE_DIR, "static", "captures")
@@ -39,8 +30,6 @@ os.makedirs(os.path.dirname(COLLECTION_PATH), exist_ok=True)
 
 app = Flask(__name__)
 
-# If your dog keeps saying "no animal recognized", lower this after
-# checking test_classifier.py to see its real confidence numbers.
 CONFIDENCE_THRESHOLD = 0.20
 
 
@@ -63,49 +52,12 @@ def format_datetime(ts):
 
 @app.route("/")
 def index():
-    """Live-camera capture page (this is the ONLY way images get in)."""
     return render_template("index.html")
 
 
-@app.route("/gallery")
-def gallery():
-    """Pokedex-style grid — one card per species caught."""
-    collection = load_collection()
-    entries = sorted(collection.values(), key=lambda e: e["first_caught"])
-    return render_template("gallery.html", entries=entries)
-
-
-@app.route("/species/<label>")
-def species_detail(label):
-    """Full photo history for a single species — every catch, not just the latest."""
-    collection = load_collection()
-    entry = collection.get(label)
-    if entry is None:
-        abort(404)
-    # Most recent photo first
-    photos = sorted(entry["photos"], key=lambda p: p["caught_at"], reverse=True)
-    return render_template("species.html", entry=entry, photos=photos)
-
-
-@app.route("/api/capture", methods=["POST"])
-def api_capture():
-    """
-    Receives a single frame captured live from the browser's camera stream
-    (see static/js/camera.js — it is NEVER a file upload; it's a canvas
-    snapshot of an active getUserMedia video feed).
-    """
-    payload = request.get_json(silent=True)
-    if not payload or "image" not in payload:
-        return jsonify({"ok": False, "error": "No image data received."}), 400
-
-    try:
-        header, b64data = payload["image"].split(",", 1)
-        img_bytes = base64.b64decode(b64data)
-        image = Image.open(io.BytesIO(img_bytes)).convert("RGB")
-    except Exception:
-        return jsonify({"ok": False, "error": "Could not decode image."}), 400
-
-    result = classify_animal(image)  # -> {"label", "confidence", "top5"} or None
+def _process_catch(image):
+    """Shared logic for both camera captures and uploads."""
+    result = classify_animal(image)
 
     if result is None or result["confidence"] < CONFIDENCE_THRESHOLD:
         return jsonify({
@@ -116,6 +68,13 @@ def api_capture():
 
     label = result["label"]
     confidence = result["confidence"]
+    # Categorize using the CLEAN label, not the full raw ImageNet label —
+    # some species' synonyms accidentally contain another animal's name
+    # (cougar's synonyms include "mountain lion", koala's include "koala
+    # bear"), which caused real miscategorization when matched against
+    # the full label. See categories.py for the targeted overrides that
+    # replace that approach for genuine conflicts like "tiger cat".
+    category_key = categorize(label, result.get("index"))
 
     filename = f"{label.replace(' ', '_')}_{uuid.uuid4().hex[:8]}.jpg"
     filepath = os.path.join(CAPTURES_DIR, filename)
@@ -126,6 +85,7 @@ def api_capture():
     if label not in collection:
         collection[label] = {
             "label": label,
+            "category": category_key,
             "first_caught": now,
             "times_caught": 0,
             "best_confidence": 0.0,
@@ -134,7 +94,6 @@ def api_capture():
     entry = collection[label]
     entry["times_caught"] += 1
     entry["best_confidence"] = max(entry["best_confidence"], confidence)
-    # Every catch is kept — no more trimming to the last 5.
     entry["photos"].append({
         "file": filename,
         "confidence": confidence,
@@ -149,9 +108,92 @@ def api_capture():
         "caught": True,
         "new_species": is_new,
         "label": label,
+        "category": CATEGORIES[category_key]["name"],
         "confidence": confidence,
         "photo_url": f"/static/captures/{filename}",
     })
+
+
+@app.route("/api/capture", methods=["POST"])
+def api_capture():
+    """Live camera frame — a canvas snapshot of the getUserMedia stream,
+    never a file upload. This is what keeps 'catches' honest."""
+    payload = request.get_json(silent=True)
+    if not payload or "image" not in payload:
+        return jsonify({"ok": False, "error": "No image data received."}), 400
+    try:
+        header, b64data = payload["image"].split(",", 1)
+        img_bytes = base64.b64decode(b64data)
+        image = Image.open(io.BytesIO(img_bytes)).convert("RGB")
+    except Exception:
+        return jsonify({"ok": False, "error": "Could not decode image."}), 400
+    return _process_catch(image)
+
+
+@app.route("/api/upload", methods=["POST"])
+def api_upload():
+    """File upload identification. NOTE: bypasses the live-camera
+    anti-cheat — any saved photo can be submitted here."""
+    if "photo" not in request.files:
+        return jsonify({"ok": False, "error": "No file received."}), 400
+    file = request.files["photo"]
+    try:
+        image = Image.open(file.stream).convert("RGB")
+    except Exception:
+        return jsonify({"ok": False, "error": "Could not read image file."}), 400
+    return _process_catch(image)
+
+
+@app.route("/gallery")
+def gallery():
+    """Top-level view: one card per category (Lions, Sharks, Snakes...)."""
+    collection = load_collection()
+    grouped = {}
+    for entry in collection.values():
+        key = entry.get("category") or categorize(entry["label"])
+        grouped.setdefault(key, []).append(entry)
+
+    category_cards = []
+    for key, cat in CATEGORIES.items():
+        species_list = grouped.get(key, [])
+        if not species_list:
+            continue
+        category_cards.append({
+            "key": key,
+            **cat,
+            "species_count": len(species_list),
+            "total_catches": sum(e["times_caught"] for e in species_list),
+            "cover_photo": species_list[0]["photos"][-1]["file"],
+        })
+    return render_template("gallery.html", categories=category_cards)
+
+
+@app.route("/category/<key>")
+def category_detail(key):
+    """Second-level view: every species/breed caught within one category."""
+    if key not in CATEGORIES:
+        abort(404)
+    collection = load_collection()
+    species_list = [
+        e for e in collection.values()
+        if (e.get("category") or categorize(e["label"])) == key
+    ]
+    species_list.sort(key=lambda e: e["first_caught"])
+    return render_template("category.html", category=CATEGORIES[key], key=key, species_list=species_list)
+
+
+@app.route("/species/<label>")
+def species_detail(label):
+    """Third-level view: individual description, ratings and full photo
+    history for one specific species."""
+    collection = load_collection()
+    entry = collection.get(label)
+    if entry is None:
+        abort(404)
+    category_key = entry.get("category") or categorize(entry["label"])
+    info = get_species_info(label, CATEGORIES[category_key])
+    photos = sorted(entry["photos"], key=lambda p: p["caught_at"], reverse=True)
+    return render_template("species.html", entry=entry, photos=photos, info=info)
 
 
 @app.route("/api/collection")

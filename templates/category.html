@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Animalton — {{ category.name }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>🐾 Animalton</h1>
+    <a class="link" href="/gallery">Back to Collection</a>
+  </header>
+
+  <main class="species-screen">
+    <div class="species-header">
+      <h2>{{ category.emoji }} {{ category.name }}</h2>
+      <p class="category-desc">{{ category.description }}</p>
+      <div class="rating-row">
+        <span class="rating-pill danger-{{ category.danger|lower|replace(' ', '-') }}">Danger: {{ category.danger }}</span>
+        <span class="rating-pill friendly">Friendliness: {{ category.friendliness }}</span>
+      </div>
+    </div>
+
+    <div class="grid">
+      {% for entry in species_list %}
+        <a class="card" href="{{ url_for('species_detail', label=entry.label) }}">
+          <div class="card-photo-wrap">
+            <img src="{{ url_for('static', filename='captures/' + entry.photos[-1].file) }}" alt="{{ entry.label }}" />
+            {% if entry.photos|length > 1 %}
+              <span class="photo-count-badge">{{ entry.photos|length }} photos</span>
+            {% endif %}
+          </div>
+          <div class="card-body">
+            <h3>{{ entry.label|capitalize }}</h3>
+            <p>Caught {{ entry.times_caught }}x</p>
+            <p class="confidence">Best match: {{ (entry.best_confidence * 100)|round(1) }}%</p>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  </main>
+</body>
+</html>

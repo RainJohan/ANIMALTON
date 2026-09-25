@@ -1,1 +1,30 @@
-{}
+{
+  "Eskimo dog": {
+    "label": "Eskimo dog",
+    "category": "dog",
+    "first_caught": 1790303788.4500628,
+    "times_caught": 1,
+    "best_confidence": 0.7925812602043152,
+    "photos": [
+      {
+        "file": "Eskimo_dog_bbd2dfcc.jpg",
+        "confidence": 0.7925812602043152,
+        "caught_at": 1790303788.4500628
+      }
+    ]
+  },
+  "Pomeranian": {
+    "label": "Pomeranian",
+    "category": "dog",
+    "first_caught": 1790303794.7843044,
+    "times_caught": 1,
+    "best_confidence": 0.8820603489875793,
+    "photos": [
+      {
+        "file": "Pomeranian_606db406.jpg",
+        "confidence": 0.8820603489875793,
+        "caught_at": 1790303794.7843044
+      }
+    ]
+  }
+}

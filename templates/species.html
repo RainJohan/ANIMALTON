@@ -16,17 +16,21 @@
     <div class="species-header">
       <h2>{{ entry.label|capitalize }}</h2>
       <p class="species-stats">
-        Caught {{ entry.times_caught }}x · Best match {{ (entry.best_confidence * 100) | round(1) }}%
+        Caught {{ entry.times_caught }}x · Best match {{ (entry.best_confidence * 100)|round(1) }}%
       </p>
+      <p class="category-desc">{{ info.description }}</p>
+      <div class="rating-row">
+        <span class="rating-pill danger-{{ info.danger|lower|replace(' ', '-') }}">Danger: {{ info.danger }}</span>
+        <span class="rating-pill friendly">Friendliness: {{ info.friendliness }}</span>
+      </div>
     </div>
 
     <div class="photo-grid">
       {% for photo in photos %}
         <div class="photo-tile">
-          <img src="{{ url_for('static', filename='captures/' + photo.file) }}"
-               alt="{{ entry.label }} catch" />
+          <img src="{{ url_for('static', filename='captures/' + photo.file) }}" alt="{{ entry.label }} catch" />
           <div class="photo-tile-meta">
-            <span class="photo-conf">{{ (photo.confidence * 100) | round(1) }}%</span>
+            <span class="photo-conf">{{ (photo.confidence * 100)|round(1) }}%</span>
             <span class="photo-date">{{ photo.caught_at | datetime }}</span>
           </div>
         </div>
