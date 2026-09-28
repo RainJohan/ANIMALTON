@@ -247,10 +247,8 @@ body {
 }
 .tip-close:hover { color: #f1f5f9; background: rgba(255,255,255,0.06); }
 
-/* FIX: pinned to a fixed corner of the VIEWPORT instead of sitting inside
-   the centering flex row. It previously used `margin: 0 auto`, which in
-   a flex row absorbs all free space and pushes siblings apart — that's
-   what was shoving the camera to the left of the page. */
+/* Pinned to a fixed corner of the VIEWPORT instead of sitting inside
+   the centering flex row, so it doesn't push the camera off-center. */
 .tip-reopen {
   position: fixed;
   bottom: 20px;
@@ -372,4 +370,40 @@ body {
 
   .grid { grid-template-columns: repeat(4, 1fr); }
   .photo-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* Show "How it works" on mobile as a bottom sheet */
+@media (max-width: 899px) {
+  .desktop-tip {
+    display: block !important;
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    z-index: 50;
+    max-height: 60vh;
+    overflow-y: auto;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    padding: 24px 20px 20px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  }
+  .desktop-tip h2 { margin-top: 0; }
+  .desktop-tip p { color: #cbd5e1; line-height: 1.6; }
+  .desktop-tip a { color: #38bdf8; }
+  .desktop-tip.hidden {
+    display: none !important;
+  }
+
+  .tip-reopen {
+    display: block !important;
+    position: fixed;
+    right: 12px;
+    bottom: 12px;
+    z-index: 40;
+  }
+  .tip-reopen.hidden {
+    display: none !important;
+  }
 }
