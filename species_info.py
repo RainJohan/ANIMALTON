@@ -1,19 +1,24 @@
 """
-ANIMALTON — per-species info
---------------------------------
-Individual description + danger/friendliness rating for specific species,
-since lumping all dogs (or all birds) together hides real differences.
+ANIMALTON — info for each specific animal (simple version)
+-----------------------------------------------------------
+Each animal below has:
+  - description    : a short fact about it
+  - danger         : how dangerous it is (Very Low ... Very High)
+  - friendliness   : how friendly it is (Very Low ... Very High)
 
-NOTE on dog breed ratings: temperament depends heavily on individual
-upbringing, training and socialization — these ratings describe general
-tendencies relevant to a casual encounter, not a claim that any breed is
-inherently dangerous or universally friendly.
+Animals NOT listed here use their category's info instead
+(see get_species_info at the bottom).
 
-Species not listed here fall back to their category's general info.
+Note on dogs: behavior depends a lot on training and upbringing. These
+ratings are only general tendencies, not a claim that a breed is
+"dangerous" or "friendly" for sure.
+
+IMPORTANT: the names (keys) must be lowercase, because the lookup
+function turns the label into lowercase before searching.
 """
 
 SPECIES_INFO = {
-    # --- Dog breeds ---
+    # ---------- Dog breeds ----------
     "pomeranian": {
         "description": "A tiny, fluffy toy breed with a fox-like face, bred down from larger Arctic sled dogs. Known for a big, confident personality in a small body.",
         "danger": "Very Low", "friendliness": "Very High"},
@@ -57,7 +62,7 @@ SPECIES_INFO = {
         "description": "A wild or semi-wild canine native to Australia — unlike domesticated dogs, dingoes behave more like wild animals.",
         "danger": "Medium", "friendliness": "Low"},
 
-    # --- Cats ---
+    # ---------- Cats ----------
     "tabby": {
         "description": "Not a breed but a common coat pattern — striped or swirled markings seen across many domestic cat breeds.",
         "danger": "Very Low", "friendliness": "Medium"},
@@ -71,7 +76,7 @@ SPECIES_INFO = {
         "description": "A short-haired breed with a spotted coat pattern, among the oldest domesticated cat breeds.",
         "danger": "Very Low", "friendliness": "Medium"},
 
-    # --- Big cats ---
+    # ---------- Big cats ----------
     "lion": {
         "description": "The only cat species that lives in social groups (prides). An apex predator capable of taking down large game.",
         "danger": "Very High", "friendliness": "Very Low"},
@@ -85,7 +90,7 @@ SPECIES_INFO = {
         "description": "The fastest land animal, built for short explosive sprints rather than raw strength. Generally more avoidant of humans than other big cats.",
         "danger": "Medium", "friendliness": "Low"},
 
-    # --- Wild mammals ---
+    # ---------- Wild mammals ----------
     "gray wolf": {
         "description": "A highly social pack-hunting canine, ancestor of the domestic dog. Naturally wary of humans in the wild.",
         "danger": "Medium", "friendliness": "Low"},
@@ -99,7 +104,7 @@ SPECIES_INFO = {
         "description": "A small, adaptable wild canine found across much of the world, including urban areas. Generally shy around humans.",
         "danger": "Low", "friendliness": "Low"},
 
-    # --- Primates ---
+    # ---------- Primates ----------
     "gorilla": {
         "description": "The largest living primate, a gentle herbivore despite its immense strength. Lives in family groups led by a dominant male.",
         "danger": "Medium", "friendliness": "Low"},
@@ -110,7 +115,7 @@ SPECIES_INFO = {
         "description": "A solitary, tree-dwelling great ape native to Indonesia and Malaysia, known for exceptional problem-solving intelligence.",
         "danger": "Low", "friendliness": "Low"},
 
-    # --- Birds ---
+    # ---------- Birds ----------
     "bald eagle": {
         "description": "A large bird of prey and the national bird of the United States. A powerful hunter with excellent eyesight.",
         "danger": "Low", "friendliness": "Low"},
@@ -121,7 +126,7 @@ SPECIES_INFO = {
         "description": "One of the largest owl species by length, a silent nocturnal hunter of small mammals.",
         "danger": "Low", "friendliness": "Low"},
 
-    # --- Reptiles ---
+    # ---------- Reptiles ----------
     "komodo dragon": {
         "description": "The largest living lizard species, an apex predator on its native Indonesian islands with a venomous bite.",
         "danger": "High", "friendliness": "Very Low"},
@@ -132,7 +137,7 @@ SPECIES_INFO = {
         "description": "A venomous snake species found across the Indian subcontinent, capable of a defensive hood display.",
         "danger": "High", "friendliness": "Very Low"},
 
-    # --- Sharks ---
+    # ---------- Sharks ----------
     "great white shark": {
         "description": "One of the ocean's largest predatory fish, an apex predator with a powerful bite. Attacks on humans are rare and often cases of mistaken identity.",
         "danger": "High", "friendliness": "Very Low"},
@@ -145,17 +150,21 @@ SPECIES_INFO = {
 }
 
 
-def get_species_info(label, category_fallback):
+def get_species_info(label, category_info):
     """
-    Returns {"description", "danger", "friendliness"} for a specific
-    species label, falling back to the broader category's info if this
-    exact species isn't individually covered.
+    label         : the animal's name, e.g. "Pug"
+    category_info : the info of its category (used if the animal isn't listed above)
+    Returns a dict with "description", "danger" and "friendliness".
     """
-    key = label.lower().strip()
+    key = label.lower().strip()          # "Pug " -> "pug"
+
+    # Is this animal in our list? Give its own info.
     if key in SPECIES_INFO:
         return SPECIES_INFO[key]
+
+    # If not, use the category's info instead
     return {
-        "description": category_fallback["description"],
-        "danger": category_fallback["danger"],
-        "friendliness": category_fallback["friendliness"],
+        "description": category_info["description"],
+        "danger": category_info["danger"],
+        "friendliness": category_info["friendliness"],
     }

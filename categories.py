@@ -1,45 +1,40 @@
 """
-ANIMALTON — animal categories
---------------------------------
-Groups the ~398 animal classes MobileNetV2/ImageNet can recognize into
-specific, narrow categories (Lions, Tigers, Sharks, Snakes, Iguanas...)
-instead of broad buckets.
+ANIMALTON — animal categories (simple version)
+-----------------------------------------------
+Puts each animal the AI can recognize into a group like "Sharks",
+"Snakes" or "Dogs".
 
-MATCHING RULES:
-  1. Dogs are matched by ImageNet INDEX (151-268), not keyword — 100%
-     reliable regardless of breed name.
-  2. SPECIES_OVERRIDES is checked next — exact species whose name
-     legitimately contains another category's keyword as a substring
-     (e.g. "tiger cat" contains "tiger" but is a domestic cat breed, not
-     a tiger). Checked before anything else so these are never
-     shadowed by a broader category's keyword.
-  3. Everything else is matched by keyword against the CLEAN display
-     label only (not the full raw ImageNet label with all its synonyms)
-     — a species' synonyms can accidentally contain another animal's
-     name (e.g. cougar's full ImageNet entry lists "mountain lion" as a
-     synonym, koala's lists "koala bear") which caused real
-     miscategorization bugs when matched against the full label. The
-     clean label avoids that.
-  4. Within step 3, order matters: more specific groups (sharks, sea
-     lions) are checked BEFORE broader ones that share a word (tigers,
-     lions) so "tiger shark" hits Sharks first, and "sea lion" hits Sea
-     Mammals before the plain "lion" check ever runs.
+How an animal gets its group (checked in this order):
+  1. DOGS   -> by the AI's number (151 to 268). Always correct.
+  2. SPECIAL CASES -> names that would be matched wrongly.
+                      Example: "tiger cat" contains the word "tiger",
+                      but it is a house cat, not a tiger.
+  3. KEYWORDS -> if the animal's name contains a keyword from a
+                 category, it goes in that category.
+                 Example: "tiger shark" contains "shark" -> Sharks.
 
-This is a heuristic, not a scientific taxonomy — good enough for a game,
-not a biology reference. New conflicts may still turn up; add them to
-SPECIES_OVERRIDES as found.
+ORDER MATTERS in step 3! The first matching category wins, so specific
+groups are placed BEFORE general ones:
+  - Sharks come before Tigers   ("tiger shark" -> Sharks)
+  - Sea Mammals come before Lions ("sea lion" -> Sea Mammals)
+
+This is a simple game-style sorting, not real science. If you find a
+wrongly sorted animal, add it to SPECIAL_CASES.
 """
 
+# ---------- Dogs (matched by number, not by name) ----------
 DOG_INDEX_START = 151
-DOG_INDEX_END = 268  # inclusive
+DOG_INDEX_END = 268     # this number is included
 
-# Exact species-name conflicts — checked FIRST, before any generic
-# keyword matching. key = substring to look for in the clean label
-# (lowercase), value = the correct category key.
-SPECIES_OVERRIDES = {
-    "tiger cat": "cat",  # domestic cat breed, not a tiger
+# ---------- Special cases (checked before keywords) ----------
+# left side = text to find in the name, right side = the correct category
+SPECIAL_CASES = {
+    "tiger cat": "cat",
 }
 
+# ---------- Two categories that have no keywords ----------
+
+# Dogs: found by number, so no keywords needed
 DOG_CATEGORY = {
     "key": "dog",
     "name": "Dogs",
@@ -50,6 +45,7 @@ DOG_CATEGORY = {
     "keywords": [],
 }
 
+# Other: used when nothing else matches
 OTHER_CATEGORY = {
     "key": "other",
     "name": "Other Animals",
@@ -60,7 +56,11 @@ OTHER_CATEGORY = {
     "keywords": [],
 }
 
+# ---------- All the other categories ----------
+# Each one has: key (short id), name, emoji, description,
+# danger, friendliness, and keywords (words that put an animal here).
 CATEGORY_LIST = [
+    # --- Sea animals (before lions/tigers, so "tiger shark" and "sea lion" match here first) ---
     {"key": "shark", "name": "Sharks", "emoji": "🦈",
      "description": "Cartilaginous fish and apex ocean predators, ranging from harmless filter-feeders to powerful hunters.",
      "danger": "High", "friendliness": "Very Low",
@@ -76,6 +76,7 @@ CATEGORY_LIST = [
      "danger": "Low", "friendliness": "Medium",
      "keywords": ["sea lion", "dugong"]},
 
+    # --- Big cats and cats ---
     {"key": "lion", "name": "Lions", "emoji": "🦁",
      "description": "The only cat species that lives in social groups (prides). An apex predator capable of taking down large game.",
      "danger": "Very High", "friendliness": "Very Low",
@@ -111,6 +112,7 @@ CATEGORY_LIST = [
      "danger": "Low", "friendliness": "High",
      "keywords": ["tabby", "persian cat", "siamese cat", "egyptian cat"]},
 
+    # --- Wild canines and bears ---
     {"key": "wolf", "name": "Wolves & Wild Dogs", "emoji": "🐺",
      "description": "Wild canines that live and hunt in social packs, generally wary of humans.",
      "danger": "Medium", "friendliness": "Low",
@@ -131,6 +133,7 @@ CATEGORY_LIST = [
      "danger": "High", "friendliness": "Very Low",
      "keywords": ["bear"]},
 
+    # --- Big land animals ---
     {"key": "elephant", "name": "Elephants", "emoji": "🐘",
      "description": "The largest living land animals, highly intelligent and social, living in matriarch-led herds.",
      "danger": "Medium", "friendliness": "Medium",
@@ -156,6 +159,7 @@ CATEGORY_LIST = [
      "danger": "Low", "friendliness": "Low",
      "keywords": ["zebra"]},
 
+    # --- Primates ---
     {"key": "primate_ape", "name": "Apes", "emoji": "🦍",
      "description": "Humans' closest living relatives — highly intelligent, social, and in several species, tool-using.",
      "danger": "Medium", "friendliness": "Low",
@@ -172,6 +176,7 @@ CATEGORY_LIST = [
      "danger": "Very Low", "friendliness": "Medium",
      "keywords": ["lemur", "indri"]},
 
+    # --- Reptiles and amphibians ---
     {"key": "snake", "name": "Snakes", "emoji": "🐍",
      "description": "Legless reptiles ranging from harmless constrictors to highly venomous species.",
      "danger": "Medium", "friendliness": "Very Low",
@@ -204,6 +209,7 @@ CATEGORY_LIST = [
      "danger": "Low", "friendliness": "Low",
      "keywords": ["frog", "toad", "salamander", "newt", "axolotl", "eft"]},
 
+    # --- Birds ---
     {"key": "bird_of_prey", "name": "Birds of Prey", "emoji": "🦅",
      "description": "Sharp-taloned hunting birds with excellent eyesight, including eagles, hawks and owls.",
      "danger": "Low", "friendliness": "Low",
@@ -233,6 +239,7 @@ CATEGORY_LIST = [
                   "grouse", "quail", "partridge", "chicken", "hen", "rooster", "peacock",
                   "coucal", "water ouzel"]},
 
+    # --- Small creatures ---
     {"key": "spider", "name": "Spiders & Scorpions", "emoji": "🕷️",
      "description": "Eight-legged arachnids — most are harmless to humans, though a few species are venomous.",
      "danger": "Medium", "friendliness": "Very Low",
@@ -258,6 +265,7 @@ CATEGORY_LIST = [
                   "hermit crab", "conch", "snail", "slug", "nautilus", "sea urchin",
                   "sea cucumber"]},
 
+    # --- Other mammals ---
     {"key": "marsupial", "name": "Marsupials", "emoji": "🦘",
      "description": "Pouched mammals native mainly to Australia, carrying and nursing their young in a pouch.",
      "danger": "Low", "friendliness": "Medium",
@@ -297,23 +305,39 @@ CATEGORY_LIST = [
      "keywords": ["armadillo"]},
 ]
 
+# ---------- Lookup table: category key -> category info ----------
+# e.g. CATEGORIES["shark"]["name"] gives "Sharks"
 CATEGORIES = {c["key"]: c for c in CATEGORY_LIST}
-CATEGORIES["dog"] = DOG_CATEGORY
-CATEGORIES["other"] = OTHER_CATEGORY
+CATEGORIES["dog"] = DOG_CATEGORY        # add dogs
+CATEGORIES["other"] = OTHER_CATEGORY    # add "other"
 
+
+# ---------- The sorting function ----------
 
 def categorize(label, imagenet_index=None):
+    """
+    label          : the animal's name, e.g. "hammerhead"
+    imagenet_index : the AI's number for this animal (used to find dogs)
+    Returns the category key, e.g. "shark".
+    """
+
+    # Step 1: Is it a dog? (its number is between 151 and 268)
     if imagenet_index is not None and DOG_INDEX_START <= imagenet_index <= DOG_INDEX_END:
         return "dog"
 
-    lower = label.lower().strip()
+    # Make the name lowercase so "Tiger" and "tiger" match
+    name = label.lower().strip()
 
-    for override_kw, cat_key in SPECIES_OVERRIDES.items():
-        if override_kw in lower:
-            return cat_key
+    # Step 2: Is it a special case? (like "tiger cat")
+    for text, category_key in SPECIAL_CASES.items():
+        if text in name:
+            return category_key
 
-    for cat in CATEGORY_LIST:
-        for kw in cat["keywords"]:
-            if kw in lower:
-                return cat["key"]
+    # Step 3: Look for a keyword. The first category that matches wins.
+    for category in CATEGORY_LIST:
+        for keyword in category["keywords"]:
+            if keyword in name:
+                return category["key"]
+
+    # Nothing matched
     return "other"
