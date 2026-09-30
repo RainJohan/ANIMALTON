@@ -1,5 +1,5 @@
 """
-ANIMALTON — backend server (simple version)
+ANIMALTON — backend server
 --------------------------------------------
 This is a small website (made with Flask). It can:
   - take a camera photo or an uploaded photo,

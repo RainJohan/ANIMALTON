@@ -1,25 +1,9 @@
 """
-ANIMALTON — animal categories (simple version)
+ANIMALTON — animal categories
 -----------------------------------------------
 Puts each animal the AI can recognize into a group like "Sharks",
 "Snakes" or "Dogs".
 
-How an animal gets its group (checked in this order):
-  1. DOGS   -> by the AI's number (151 to 268). Always correct.
-  2. SPECIAL CASES -> names that would be matched wrongly.
-                      Example: "tiger cat" contains the word "tiger",
-                      but it is a house cat, not a tiger.
-  3. KEYWORDS -> if the animal's name contains a keyword from a
-                 category, it goes in that category.
-                 Example: "tiger shark" contains "shark" -> Sharks.
-
-ORDER MATTERS in step 3! The first matching category wins, so specific
-groups are placed BEFORE general ones:
-  - Sharks come before Tigers   ("tiger shark" -> Sharks)
-  - Sea Mammals come before Lions ("sea lion" -> Sea Mammals)
-
-This is a simple game-style sorting, not real science. If you find a
-wrongly sorted animal, add it to SPECIAL_CASES.
 """
 
 # ---------- Dogs (matched by number, not by name) ----------

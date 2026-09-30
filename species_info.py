@@ -1,5 +1,5 @@
 """
-ANIMALTON — info for each specific animal (simple version)
+ANIMALTON — info for each specific animal
 -----------------------------------------------------------
 Each animal below has:
   - description    : a short fact about it
